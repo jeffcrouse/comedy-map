@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+	<Document>
+		<name>Comedy Map - NYC</name>
+		<description>Comedy events in the NYC area</description>
+
+
+		<Style id="d1">
+			<IconStyle>
+				<color>ffff0000</color>
+				<Icon>
+					<href>http://jcrouse.s3.amazonaws.com/map/comedyclub.png</href>
+				</Icon>
+			</IconStyle>
+		</Style>
+
+		<Style id="d2">
+			<IconStyle>
+				<color>ffef0010</color>
+				<Icon>
+					<href>http://jcrouse.s3.amazonaws.com/map/theater.png</href>
+				</Icon>
+			</IconStyle>
+		</Style>
+
+
+		{{#shows}}
+			<Placemark>
+				<name>{{title}}</name>
+				<atom:author>{{author}}</atom:author>
+				<atom:link href="{{link}}"/>
+				<address>{{address}}</address>
+				<styleUrl>#d1</styleUrl>
+
+				<description><![CDATA[
+					<h1>{{title}} at {{venue}}</h1>
+					<p>{{date}}</p>
+					<p>{{details}}</p>
+					<p>{{address}}</p>
+					<a href="{{link}}">{{link}}</a>
+					<p><small>by {{author}}</small></p>
+				]]></description>
+
+				<Point>
+					<coordinates>{{longitude}},{{latitude}}</coordinates>
+				</Point>
+
+			</Placemark>
+		{{/shows}}
+
+
+		{{#openmics}}
+			<Placemark>
+				<name>{{title}}</name>
+				<atom:author>{{author}}</atom:author>
+				<atom:link href="{{link}}"/>
+				<address>{{address}}</address>
+				<styleUrl>#d2</styleUrl>
+
+				<description><![CDATA[
+					<b>at {{venue}}</b>
+					<p>{{date}}</p>
+					<p>{{details}}</p>
+					<p>{{address}}</p>
+					<a href="{{link}}">{{link}}</a>
+					<p><small>by {{author}}</small></p>
+				]]></description>
+
+				<Point>
+					<coordinates>{{longitude}},{{latitude}}</coordinates>
+				</Point>
+
+			</Placemark>
+		{{/openmics}}
+
+	</Document>
+</kml>
