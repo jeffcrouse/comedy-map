@@ -16,13 +16,7 @@ var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
 var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + '/.credentials/';
-var TOKEN_PATH = TOKEN_DIR + 'calendar-api-quickstart.json';
-
-if (!fs.existsSync(TOKEN_DIR)){
-    fs.mkdirSync(TOKEN_DIR);
-}
+var TOKEN_PATH = path.join(__dirname, 'calendar-api-token.json');
 
 var oauth2Client = null;
 
@@ -60,32 +54,21 @@ function getNewToken() {
 	});
 }
 
+var clientSecret = process.env.GCAL_CLIENT_SECRET;
+var clientId = process.env.GCAL_CLIENT_ID;
+var redirectUrl = process.env.GCAL_REDIRECT_URL;
+var auth = new googleAuth();
+oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-
-// Load client secrets from a local file.
-fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+// Check if we have previously stored a token.
+fs.readFile(TOKEN_PATH, function(err, token) {
 	if (err) {
-		console.log('Error loading client secret file: ' + err);
-		return;
+		getNewToken(oauth2Client);
+	} else {
+		oauth2Client.credentials = JSON.parse(token);
 	}
-	// Authorize a client with the loaded credentials, then call the
-	// Google Calendar API.
-	var credentials = JSON.parse(content);
-	var clientSecret = credentials.installed.client_secret;
-	var clientId = credentials.installed.client_id;
-	var redirectUrl = credentials.installed.redirect_uris[0];
-	var auth = new googleAuth();
-	oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-	
-	// Check if we have previously stored a token.
-	fs.readFile(TOKEN_PATH, function(err, token) {
-		if (err) {
-			getNewToken(oauth2Client);
-		} else {
-			oauth2Client.credentials = JSON.parse(token);
-		}
-	});
 });
+
 
 
 var app = express();
