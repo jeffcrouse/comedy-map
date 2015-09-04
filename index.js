@@ -55,7 +55,7 @@ app.get('/data', function (req, res) {
 	var redirectUrl = process.env.GCAL_REDIRECT_URL;
 	var auth = new googleAuth();
 	var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-	oauth2Client.credentials = process.env.GCAL_TOKEN;
+	oauth2Client.credentials = JSON.parse(process.env.GCAL_TOKEN);
 
 
 	//https://github.com/google/google-api-nodejs-client/blob/master/apis/calendar/v3.js#L872
