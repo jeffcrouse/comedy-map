@@ -32,12 +32,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 //     next()
 // });
 
+console.log(process.env.GCAL_TOKEN);
 
 
 app.get('/', function(req, res){
 	res.render("index", {})
 });
-
 
 
 var template = hogan.compile('<div class="info">\
