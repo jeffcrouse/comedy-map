@@ -28,3 +28,5 @@ node_modules
 
 
 calendar-api-token.json
+*.sublime-project
+*.sublime-workspace
