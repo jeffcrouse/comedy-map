@@ -79,7 +79,10 @@ app.get('/data', function (req, res) {
 
 		async.eachSeries(response.items, function(event, next){
 			geocoder.geocode(event.location, function ( err, data ) {
-				if(data.results.length > 0) {
+				if(err) console.log(err);
+				else if(data.results.length == 0) {
+					console.log("Couldn't find location. Skipping")
+				} else {
 					var result = data.results.pop();
 					var start = event.start.dateTime || event.start.date;
 
@@ -89,9 +92,7 @@ app.get('/data', function (req, res) {
 						location: result.geometry.location,
 						title: event.summary,
 					});
-				} else {
-					console.log("Couldn't find location. Skipping")
-				}
+				} 
 				next(null);
 			});
 		}, function(err){
