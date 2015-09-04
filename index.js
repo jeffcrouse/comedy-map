@@ -14,26 +14,6 @@ var bodyParser = require('body-parser');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
-var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-var TOKEN_PATH = path.join(__dirname, 'calendar-api-token.json');
-
-
-var clientSecret = process.env.GCAL_CLIENT_SECRET;
-var clientId = process.env.GCAL_CLIENT_ID;
-var redirectUrl = process.env.GCAL_REDIRECT_URL;
-var auth = new googleAuth();
-var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-
-// Check if we have previously stored a token.
-fs.readFile(TOKEN_PATH, function(err, token) {
-	if (err) {
-		console.error("Couldn't read auth token!")
-		process.exit(1);
-	} else {
-		oauth2Client.credentials = JSON.parse(token);
-	}
-});
-
 
 
 var app = express();
@@ -69,6 +49,14 @@ var template = hogan.compile('<div class="info">\
 
 
 app.get('/data', function (req, res) {
+
+	var clientSecret = process.env.GCAL_CLIENT_SECRET;
+	var clientId = process.env.GCAL_CLIENT_ID;
+	var redirectUrl = process.env.GCAL_REDIRECT_URL;
+	var auth = new googleAuth();
+	var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+	oauth2Client.credentials = JSON.parse(process.env.GCAL_TOKEN);
+
 
 	//https://github.com/google/google-api-nodejs-client/blob/master/apis/calendar/v3.js#L872
 	var calendar = google.calendar('v3');

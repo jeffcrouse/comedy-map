@@ -4,10 +4,6 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
-var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-var TOKEN_PATH = path.join(__dirname, 'calendar-api-token.json');
-
-
 /**
  * Get and store new token after prompting for user authorization, and then
  * execute the given callback with the authorized OAuth2 client.
@@ -17,16 +13,15 @@ var TOKEN_PATH = path.join(__dirname, 'calendar-api-token.json');
  *     client.
  */
 
-
 var clientSecret = process.env.GCAL_CLIENT_SECRET;
 var clientId = process.env.GCAL_CLIENT_ID;
 var redirectUrl = process.env.GCAL_REDIRECT_URL;
 var auth = new googleAuth();
-oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
 var authUrl = oauth2Client.generateAuthUrl({
 	access_type: 'offline',
-	scope: SCOPES
+	scope: ['https://www.googleapis.com/auth/calendar.readonly']
 });
 
 console.log('Authorize this app by visiting this url: ', authUrl);
@@ -43,7 +38,7 @@ rl.question('Enter the code from that page here: ', function(code) {
 			return;
 		}
 		oauth2Client.credentials = token;
-		fs.writeFile(TOKEN_PATH, JSON.stringify(token));
-		console.log('Token stored to ' + TOKEN_PATH);
+		console.log("SET GCAL_TOKEN TO:")
+		console.log(token);
 	});
 });
