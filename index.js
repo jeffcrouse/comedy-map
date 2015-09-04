@@ -11,59 +11,24 @@ var favicon = require('serve-favicon');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
 var SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 var TOKEN_PATH = path.join(__dirname, 'calendar-api-token.json');
 
-var oauth2Client = null;
-
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- *
- * @param {google.auth.OAuth2} oauth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback to call with the authorized
- *     client.
- */
-function getNewToken() {
-	var authUrl = oauth2Client.generateAuthUrl({
-		access_type: 'offline',
-		scope: SCOPES
-	});
-
-	console.log('Authorize this app by visiting this url: ', authUrl);
-	var rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout
-	});
-
-	rl.question('Enter the code from that page here: ', function(code) {
-		rl.close();
-		oauth2Client.getToken(code, function(err, token) {
-			if (err) {
-				console.log('Error while trying to retrieve access token', err);
-				return;
-			}
-			oauth2Client.credentials = token;
-			fs.writeFile(TOKEN_PATH, JSON.stringify(token));
-			console.log('Token stored to ' + TOKEN_PATH);
-		});
-	});
-}
 
 var clientSecret = process.env.GCAL_CLIENT_SECRET;
 var clientId = process.env.GCAL_CLIENT_ID;
 var redirectUrl = process.env.GCAL_REDIRECT_URL;
 var auth = new googleAuth();
-oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
 // Check if we have previously stored a token.
 fs.readFile(TOKEN_PATH, function(err, token) {
 	if (err) {
-		getNewToken(oauth2Client);
+		console.error("Couldn't read auth token!")
+		process.exit(1);
 	} else {
 		oauth2Client.credentials = JSON.parse(token);
 	}
@@ -87,6 +52,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 //     next()
 // });
 
+
+
 app.get('/', function(req, res){
 	res.render("index", {})
 });
@@ -100,6 +67,7 @@ var template = hogan.compile('<div class="info">\
 		<p><small>{{creator.displayName}}</small></p>\
 	</div>');
 
+
 app.get('/data', function (req, res) {
 
 	//https://github.com/google/google-api-nodejs-client/blob/master/apis/calendar/v3.js#L872
@@ -108,16 +76,19 @@ app.get('/data', function (req, res) {
 		auth: oauth2Client,
 		calendarId: 'mcq01cj8g9blh0u8afm2r0rhng@group.calendar.google.com',
 		timeMin: (new Date()).toISOString(),
-		maxResults: 10,
+		maxResults: 100,
 		//singleEvents: true,
 		//orderBy: 'startTime'
 	}, function(err, response) {
+
 		if (err) {
 			res.send('The API returned an error: ' + err);
 			return;
 		}
 		var events = [];
+
 		console.log("response.items.length", response.items.length);
+
 		async.eachSeries(response.items, function(event, next){
 			geocoder.geocode(event.location, function ( err, data ) {
 				if(data.results.length > 0) {
@@ -130,6 +101,8 @@ app.get('/data', function (req, res) {
 						location: result.geometry.location,
 						title: event.summary,
 					});
+				} else {
+					console.log("Couldn't find location. Skipping")
 				}
 				next(null);
 			});
