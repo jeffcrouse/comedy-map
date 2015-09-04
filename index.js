@@ -76,7 +76,7 @@ app.get('/data', function (req, res) {
 		auth: oauth2Client,
 		calendarId: 'mcq01cj8g9blh0u8afm2r0rhng@group.calendar.google.com',
 		timeMin: (new Date()).toISOString(),
-		maxResults: 100,
+		maxResults: 200,
 		//singleEvents: true,
 		//orderBy: 'startTime'
 	}, function(err, response) {
