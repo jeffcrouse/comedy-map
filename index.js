@@ -1,4 +1,4 @@
-var path = require('path');
+-var path = require('path');
 var util = require('util');
 var http = require('http');
 var fs = require('fs');
@@ -25,14 +25,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(function (req, res, next) {
-//     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-//     res.header('Expires', '-1');
-//     res.header('Pragma', 'no-cache');
-//     next()
-// });
-
-console.log(process.env.GCAL_TOKEN);
+app.use(function (req, res, next) {
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+    next()
+});
 
 
 app.get('/', function(req, res){
