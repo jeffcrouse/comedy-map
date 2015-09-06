@@ -16,6 +16,28 @@ var googleAuth = require('google-auth-library');
 
 
 
+var TOKEN_PATH = 'calendar-api-token.json';
+// General tutorial for calendar API here: https://developers.google.com/google-apps/calendar/quickstart/nodejs
+// Get this info at https://console.developers.google.com/flows/enableapi?apiid=calendar
+var clientSecret = process.env.GCAL_CLIENT_SECRET;
+var clientId = process.env.GCAL_CLIENT_ID;
+var redirectUrl = process.env.GCAL_REDIRECT_URL;
+var auth = new googleAuth();
+var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+
+fs.readFile(TOKEN_PATH, function(err, token) {
+	if (err) {
+		console.error("couldn't authenticate");
+		res.json({events: events});
+		return;
+	} else {
+		oauth2Client.credentials = JSON.parse(token);
+	}
+});
+
+
+
+
 var app = express();
 var server = require('http').Server(app);
 app.set('views', path.join(__dirname, 'views'));
@@ -46,14 +68,9 @@ var template = hogan.compile('<div class="info">\
 	</div>');
 
 
-app.get('/data', function (req, res) {
 
-	var clientSecret = process.env.GCAL_CLIENT_SECRET;
-	var clientId = process.env.GCAL_CLIENT_ID;
-	var redirectUrl = process.env.GCAL_REDIRECT_URL;
-	var auth = new googleAuth();
-	var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
-	oauth2Client.credentials = JSON.parse(process.env.GCAL_TOKEN);
+app.get('/data', function (req, res) {
+	var events = [];
 
 
 	//https://github.com/google/google-api-nodejs-client/blob/master/apis/calendar/v3.js#L872
@@ -68,11 +85,11 @@ app.get('/data', function (req, res) {
 	}, function(err, response) {
 
 		if (err) {
-			res.send('The API returned an error: ' + err);
+			console.error(err);
+			res.json({events: events});
 			return;
 		}
-		var events = [];
-
+		
 		console.log("response.items.length", response.items.length);
 
 		async.eachSeries(response.items, function(event, next){

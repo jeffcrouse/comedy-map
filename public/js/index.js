@@ -9,11 +9,6 @@ function initMap() {
 		zoom: 8
 	});
 
-	// var d = new Date();
-	// var url = 'http://comedy-map.herokuapp.com/feed.kml?t='+d.getTime();
-	// var layer = new google.maps.KmlLayer({ url: url });
-	// layer.setMap(map);
-
 	var add_event = function(event) {
 
 		var infowindow = new google.maps.InfoWindow({
@@ -39,7 +34,6 @@ function initMap() {
 		bounds.extend(marker.getPosition());
 	}
 
-
 	$.ajax({
 		url: '/data',
 		data: {},
@@ -51,6 +45,28 @@ function initMap() {
 		success: function(data) {
 			data.events.forEach(add_event);
 			map.fitBounds( bounds );
+			locate_user();
 		},
 	});
+}
+
+function locate_user() {
+	if (!navigator.geolocation) return false;
+	navigator.geolocation.getCurrentPosition(function(position) {
+
+		var marker = new google.maps.Marker({
+			position: {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			},
+			map: map,
+			icon: "/img/geolocation.png",
+			title: "You"
+		});
+
+		map.setCenter(marker.getPosition());
+		map.setZoom(14);
+    }, function() {
+		console.log("Geolocation failed");
+    });
 }

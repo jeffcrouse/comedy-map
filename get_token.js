@@ -4,6 +4,8 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
+var TOKEN_PATH = 'calendar-api-token.json';
+
 /**
  * Get and store new token after prompting for user authorization, and then
  * execute the given callback with the authorized OAuth2 client.
@@ -24,11 +26,18 @@ var authUrl = oauth2Client.generateAuthUrl({
 	scope: ['https://www.googleapis.com/auth/calendar.readonly']
 });
 
-console.log('Authorize this app by visiting this url: ', authUrl);
+console.log('Authorize this app by visiting this url: ');
+console.log(authUrl);
+console.log()
 var rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
+
+
+function addslashes (str) {
+    return (str+'').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+}
 
 rl.question('Enter the code from that page here: ', function(code) {
 	rl.close();
@@ -37,8 +46,7 @@ rl.question('Enter the code from that page here: ', function(code) {
 			console.log('Error while trying to retrieve access token', err);
 			return;
 		}
-		oauth2Client.credentials = token;
-		console.log("SET GCAL_TOKEN TO:")
-		console.log(token);
+  		fs.writeFile(TOKEN_PATH, JSON.stringify(token));
+  		console.log('Token stored to ' + TOKEN_PATH);
 	});
 });
